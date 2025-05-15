@@ -1,6 +1,9 @@
-import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient } from '@prisma/client';
+
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
     try {
@@ -17,23 +20,22 @@ export async function POST(request: NextRequest) {
 
         // Create a unique ID for this contact
         const id = uuidv4();
-        const timestamp = new Date().toISOString();
+        const timestamp = new Date();
 
-        // Store in Vercel KV (Redis)
-        await kv.hset(`contact:${id}`, {
-            id,
-            name,
-            email,
-            subject: subject || '',
-            message: message || '',
-            timestamp,
-            type: 'contact'
+        // Store in PostgreSQL using Prisma
+        const contact = await prisma.contact.create({
+            data: {
+                id,
+                name,
+                email,
+                subject: subject || '',
+                message: message || '',
+                createdAt: timestamp,
+                type: 'contact'
+            }
         });
 
-        // Add to a list for easy retrieval
-        await kv.lpush('contacts', id);
-
-        return NextResponse.json({ success: true, id });
+        return NextResponse.json({ success: true, id: contact.id });
     } catch (error) {
         console.error('Error saving contact:', error);
         return NextResponse.json(

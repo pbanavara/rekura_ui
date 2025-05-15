@@ -194,7 +194,7 @@ export default function DemoModal({ isOpen, onClose }: DemoModalProps) {
                         : 'bg-blue-600 hover:bg-blue-700'
                     }`}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Request Demo'}
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                 </div>
               </form>
